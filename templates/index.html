@@ -37,7 +37,7 @@
 <h2 id="status">Status: {{ state["status"] }}</h2>
 
 <script>
-  let balance = {{ state["balance'] }};
+  let balance = {{ state["balance"] }};
   let statusText = document.getElementById("status");
   let player = document.getElementById("player");
 
@@ -65,7 +65,7 @@
     .then(res => res.json())
     .then(data => {
       balance = data.balance;
-      reder();
+      render();
       statusText.textContent = "Status: " + data.status;
     });
   }
