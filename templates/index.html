@@ -1,1 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tight Rope Balance Game</title>
+  <style>
+    body {font-family: Arial; text-align: center; }
+    #bar {
+      width: 400px;
+      height: 10px;
+      background-color: gray;
+      margin: 50px auto;
+      position: relative;
+    }
+    #player {
+      width: 20px;
+      height: 20px;
+      background-color: red;
+      position: absolute;
+      top: -5px;
+      left: 190px;
+      border-radius: 50%
+    }
+  </style>
+</head>
+<body>
 
+
+
+<h1>Tight Rope Balance Game</h1>
+<p>Use the left and right arrow keys to stay balanced.</p>
+
+
+<div id="bar">
+  <div id="player"></div>
+</div>
+
+<h2 id="status">Status: {{ state["status"] }}</h2>
+
+<script>
+  let balance = {{ state["balance'] }};
+  let statusText = document.getElementById("status");
+  let player = document.getElementById("player");
+
+
+  // Update the player's position visually
+  function render() {
+    player.style.left = (190 + balance * 5) + "px";
+  }
+  render();
+
+  document.addEventListener("keydown", function(event) {
+    if (event.key === "ArrowLeft") {
+      sendUpdate("left");
+    } else if (event.key === "ArrowRight") {
+      sendUpdate("right");
+    }
+  });
+
+  function sendUpdate(direction) {
+    fetch("/update_balance", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({direction: direction])
+    })
+    .then(res => res.json())
+    .then(data => {
+      balance = data.balance;
+      reder();
+      statusText.textContent = "Status: " + data.status;
+    });
+  }
+</script>
+
+</body>
+</html>
