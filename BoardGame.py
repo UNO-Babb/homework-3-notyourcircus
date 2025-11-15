@@ -6,28 +6,35 @@ app = Flask(__name__)
 
 SAVE_FILE = "game_state.txt"
 
-# Starting game state
-game_state = {
-    "balance": 0,      # 0 is centered; positive = right lean, negative = left lean
-    "player": "Player 1",
+# Default game state
+default_state = {
+    "balance": 0,
     "status": "playing"
 }
 
+
 def load_game():
+    """Load the saved game state from file, or return defaults."""
     if os.path.exists(SAVE_FILE):
         with open(SAVE_FILE, "r") as f:
-            data = json.load(f)
-            return data
-    return game_state
+            try:
+                return json.load(f)
+            except:
+                return default_state
+    return default_state
+
 
 def save_game(state):
+    """Save game state to file."""
     with open(SAVE_FILE, "w") as f:
         json.dump(state, f)
 
+
 @app.route("/")
 def index():
-    current_state = load_game()
-    return render_template("index.html", state=current_state)
+    state = load_game()
+    return render_template("index.html", state=state)
+
 
 @app.route("/update_balance", methods=["POST"])
 def update_balance():
@@ -36,12 +43,13 @@ def update_balance():
 
     state = load_game()
 
+    # Move balance based on key pressed
     if direction == "left":
         state["balance"] -= 1
     elif direction == "right":
         state["balance"] += 1
 
-    # Lose condition: too far in either direction
+    # Check losing condition
     if state["balance"] <= -10 or state["balance"] >= 10:
         state["status"] = "fell"
     else:
@@ -50,12 +58,12 @@ def update_balance():
     save_game(state)
     return jsonify(state)
 
+
 @app.route("/reset", methods=["POST"])
 def reset():
-    global game_state
-    game_state = {"balance": 0, "player": "Player 1", "status": "playing"}
-    save_game(game_state)
-    return jsonify(game_state)
+    save_game(default_state)
+    return jsonify(default_state)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
